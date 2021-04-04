@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\critics;
+use App\Models\Critics;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\CreateCriticRequest;
 
 class CriticController extends Controller
 {
@@ -14,30 +16,70 @@ class CriticController extends Controller
      */
     public function index()
     {
-        $response = CriticResource::collection(critics::paginate(20));
-        if (sizeof($response) == 0) return response('Succès mais vide!', 204); 
+        $response = CriticResource::collection(Critics::paginate(20));
+        if (sizeof($response) == 0) {
+            return response(["message"=>"Success but empty"], 204)->header('Content-Type', 'application/json');
+        }
         return $response;
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    * @OA\Post(
+    *     path="/api/critic",
+    *     tags={"Critic"},
+    *     summary="Add a new critic",
+    *      @OA\Parameter(
+    *          name="user_id",
+    *          in="query",
+    *          required=true,
+    *          @OA\Schema(
+    *              type="integer"
+    *          )
+    *      ),
+    *      @OA\Parameter(
+    *          name="film_id",
+    *          in="query",
+    *          required=true,
+    *          @OA\Schema(
+    *              type="integer"
+    *          )
+    *      ),
+    *      @OA\Parameter(
+    *          name="score",
+    *          in="query",
+    *          required=true,
+    *          @OA\Schema(
+    *              type="integer"
+    *          )
+    *      ),
+    *      @OA\Parameter(
+    *          name="comment",
+    *          in="query",
+    *          required=true,
+    *          @OA\Schema(
+    *              type="string"
+    *          )
+    *      ),
+    *   security={{ "bearerAuth":{} }},
+    *   @OA\Response(
+    *       response=405,
+    *       description="Invalid input",
+    *   )
+    *)
+    */
+    public function store(CreateCriticRequest $request)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+        $data = $request->validated();
+        $critic = new Critics;
+        $critic->user_id = Auth::id();
+        $critic->film_id = $data['film_id'];
+        $critic->score = $data['score'];
+        if (isset($data['comment'])) {
+            $critic->comment = $data['comment'];
+        }
+            
+        $critic->save();
+        return response(["message"=>"Successfully Created Critic"], 201)->header('Content-Type', 'application/json');
     }
 
     /**
@@ -68,41 +110,9 @@ class CriticController extends Controller
     {
         $response = critics::where('film_id', '=', $id)->get();
 
-        if (sizeof($response) == 0) return response('Succès mais vide!', 204); 
+        if (sizeof($response) == 0) {
+            return response(["message"=>"No Critics with requested ID"], 404)->header('Content-Type', 'application/json');
+        }
         return $response;
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

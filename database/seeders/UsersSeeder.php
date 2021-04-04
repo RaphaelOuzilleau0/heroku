@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
-class Critics extends Seeder
+class UsersSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,6 +14,7 @@ class Critics extends Seeder
      */
     public function run()
     {
-        //
+        $sql = file_get_contents(database_path() . '/seeders/users.sql');
+        DB::statement($sql);
     }
 }

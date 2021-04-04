@@ -13,18 +13,19 @@ class CreateCriticsTable extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
         Schema::create('critics', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->length(11); // FOREIGN KEY
-            $table->integer('film_id')->length(11); // FOREIGN KEY
-            $table->decimal('score', 3,1);
-            $table->text('comment');
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at')->nullable();
+            $table->bigInteger('user_id')->unsigned();
+            $table->bigInteger('film_id')->unsigned();
+            $table->decimal('score', 3, 1);
+            $table->text('comment')->nullable();
+            $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('films');
-            $table->foreign('film_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('film_id')->references('id')->on('films');
         });
+        Schema::enableForeignKeyConstraints();
     }
 
     /**

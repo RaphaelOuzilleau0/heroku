@@ -2,10 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Film;
-
-use Illuminate\Support\Facades\Artisan;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -13,189 +9,155 @@ use Tests\TestCase;
 class FilmTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected $seed = true;
+
+    /*****************************
+     * Index
+     ****************************/
+
+    public function testGetFilms_shouldReturnTitleAli_Forever()
+    {
+        $response = $this->getJson('/api/films');
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonFragment(['title' => 'ALI FOREVER']);
+    }
+
+    /*****************************
+     * Show
+     ****************************/
     
-    public function setUp() : void {
-        parent::setUp();
-        $_GET['keyword'] = null;
-        $_GET['minlength'] = null;
-        $_GET['maxlength'] = null;
-        $_GET['rating'] = null;
-        Artisan::call('migrate:rollback');
-        Artisan::call('migrate');
-        Artisan::call('db:seed');
-    }
-
-    public function test_routeFilms()
+    public function testGetFilmsWithId1_shouldReturnTitleAcademy_Dinosaur()
     {
-        $response = $this->get('/api/films');
-
-        $response->assertStatus(200);
-    }
-
-    public function test_routeFilm_whenFilmExists()
-    {
-        $response = $this->get('/api/films/1');
-
-        $response->assertStatus(200);
-    }
-
-    public function test_routeFilm_whenFilmDoesntExist()
-    {
-        $response = $this->get('/api/films/1000');
-
-        $response->assertStatus(404);
-    }
-
-    public function test_getFilmCritic_whenFilmHasNoCritics()
-    {
-        $response = $this->get('/api/films/2/critics');
-
-        $response->assertStatus(204);
-    }
-
-    public function test_getFilmCritic_whenFilmHasCritics()
-    {
-        $response = $this->get('/api/films/1/critics');
+        $response = $this->getJson('/api/films/1');
 
         $response
             ->assertStatus(200)
-            ->assertJsonFragment(['comment'=>'This is a comment.']);
+            ->assertJsonFragment(['title' => 'ACADEMY DINOSAUR']);
+    }
+    
+    public function testGetFilms_withInvalidId_shouldReturnCode404()
+    {
+        $response = $this->getJson('/api/films/400');
+
+        $response
+            ->assertStatus(404);
     }
 
-    public function test_getFilmActors()
+    /*****************************
+     * Search
+     ****************************/
+
+    public function testGetFilmsWithKeywordAcademy_inTitle_shouldReturnTitleAcademy_Dinosaur()
     {
-        $response = $this->get('/api/films/1/actors');
+        $response = $this->getJson('/api/films?keyword=ACADEMY');
 
         $response
             ->assertStatus(200)
-            ->assertJsonFragment(['first_name'=>'CHRISTIAN'])
-            ->assertJsonFragment(['last_name'=>'GABLE']);
+            ->assertJsonFragment(['title' => 'ACADEMY DINOSAUR'])
+            ->assertJsonFragment(['per_page' => 20]);
     }
 
-    public function test_getFilms_whenNoRestrictTitleAndDescription()
+    public function testGetFilmsWithKeywordFeminist_inDescription_shouldReturnTitleAcademy_Dinosaur()
     {
-        $response = $this->getJson('/api/films');
+        $response = $this->getJson('/api/films?keyword=Feminist');
+
         $response
             ->assertStatus(200)
-            ->assertJsonFragment(['title'=>'ACADEMY DINOSAUR'])
-            ->assertJsonFragment(['total'=>100]);   
+            ->assertJsonFragment(['title' => 'ACADEMY DINOSAUR'])
+            ->assertJsonFragment(['per_page' => 20]);
     }
 
-    public function test_getFilms_whenRestrictTitleAndDescription_andNothingFit_status204()
+    public function testGetFilmsWithRatingPG_shouldReturnTitleAcademy_Dinosaur()
     {
-        $_GET['keyword'] = 'TEST';
-        $response = $this->getJson('/api/films');
+        $response = $this->getJson('/api/films?rating=PG');
 
-        $response->assertStatus(204);  
+        $response
+            ->assertStatus(200)
+            ->assertJsonFragment(['title' => 'ACADEMY DINOSAUR'])
+            ->assertJsonFragment(['per_page' => 20]);
     }
 
-    public function test_getFilms_whenRestrictTitleAndDescription_andOneFits()
+    public function testGetFilmsWithMinLength20_shouldReturnTitleAcademy_Dinosaur()
     {
-        $_GET['keyword'] = 'airport';
+        $response = $this->getJson('/api/films?minLength=20');
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonFragment(['title' => 'ACADEMY DINOSAUR'])
+            ->assertJsonFragment(['per_page' => 20]);
+    }
+
+    public function testGetFilmsWithMaxLength90_shouldReturnTitleAcademy_Dinosaur()
+    {
+        $response = $this->getJson('/api/films?maxLength=90');
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonFragment(['title' => 'ACADEMY DINOSAUR'])
+            ->assertJsonFragment(['per_page' => 20]);
+    }
+
+    public function testGetFilmsWithNoParam_shouldReturnTitleAcademy_Dinosaur()
+    {
         $response = $this->getJson('/api/films');
 
         $response
             ->assertStatus(200)
-            ->assertJsonFragment(['title'=>'AIRPORT POLLOCK'])
-            ->assertJsonFragment(['total'=>1]);   
+            ->assertJsonFragment(['title' => 'ACADEMY DINOSAUR']);
     }
 
-    public function test_getFilms_whenRestrictTitleAndDescription_andManyFit()
+    public function testGetFilmsWithNoParam_shouldReturn20PerPages()
     {
-        $_GET['keyword'] = 'epic';
         $response = $this->getJson('/api/films');
 
         $response
             ->assertStatus(200)
-            ->assertJsonFragment(['total'=>6]);   
+            ->assertJsonFragment(['per_page' => 20]);
     }
 
-    public function test_getFilms_whenRestrictMinLength_andNothingFit_status204()
-    {
-        $_GET['minlength'] = '500';
-        $response = $this->getJson('/api/films');
+    /*****************************
+     * ShowActors
+     ****************************/
 
-        $response->assertStatus(204);  
-    }
+    // public function testGetActors_withIdOne_shouldReturnPenelopeGuiness()
+    // {
+    //     $response = $this->getJson('/api/films/1/actors');
 
-    public function test_getFilms_whenRestrictMinLength_andOneFits()
+    //     $response
+    //         ->assertStatus(200)
+    //         ->assertJsonFragment(['last_name' => 'GUINESS'])
+    //         ->assertJsonFragment(['first_name' => 'PENELOPE']);
+    // }
+
+    // public function testGetActors_withInvalidId_shouldReturnCode404()
+    // {
+    //     $response = $this->getJson('/api/films/400/actors');
+
+    //     $response
+    //         ->assertStatus(404);
+    // }
+
+    /*****************************
+     * ShowCritics
+     ****************************/
+
+    public function testGetCritics_withIdOne_shouldReturnScoreOf10()
     {
-        $_GET['minlength'] = '182';
-        $response = $this->getJson('/api/films');
+        $response = $this->getJson('/api/films/1/critics');
 
         $response
             ->assertStatus(200)
-            ->assertJsonFragment(['length'=>182])
-            ->assertJsonFragment(['total'=>1]);   
+            ->assertJsonFragment(['score' => '10.0']);
     }
 
-    public function test_getFilms_whenRestrictMinLength_andManyFits()
+    public function testGetCritics_withInvalidId_shouldReturnCode404()
     {
-        $_GET['minlength'] = '177';
-        $response = $this->getJson('/api/films');
+        $response = $this->getJson('/api/films/400/critics');
 
         $response
-            ->assertStatus(200)
-            ->assertJsonFragment(['length'=>179])
-            ->assertJsonFragment(['length'=>180])
-            ->assertJsonFragment(['length'=>181])
-            ->assertJsonFragment(['length'=>182])
-            ->assertJsonFragment(['total'=>5]);   
-    }
-
-    public function test_getFilms_whenRestrictMaxLength_andNothingFits_status204()
-    {
-        $_GET['maxlength'] = '40';
-        $response = $this->getJson('/api/films');
-
-        $response->assertStatus(204);
-    }
-
-    public function test_getFilms_whenRestrictMaxLength_andOneFits()
-    {
-        $_GET['maxlength'] = '47';
-        $response = $this->getJson('/api/films');
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonFragment(['length'=>46])
-            ->assertJsonFragment(['total'=>1]);   
-    }
-
-    public function test_getFilms_whenRestrictMaxLength_andManyFits()
-    {
-        $_GET['maxlength'] = '49';
-        $response = $this->getJson('/api/films');
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonFragment(['length'=>46])
-            ->assertJsonFragment(['length'=>48])
-            ->assertJsonFragment(['total'=>2]);   
-    }
-
-    public function test_getFilms_whenRestrictRating_andNothingFits_status204()
-    {
-        $_GET['rating'] = 'ABC';
-        $response = $this->getJson('/api/films');
-
-        $response->assertStatus(204);  
-    }
-
-    public function test_getFilms_whenRestrictRating_andManyFits()
-    {
-        $_GET['rating'] = 'G';
-        $response = $this->getJson('/api/films');
-
-        $response
-            ->assertStatus(200)
-            ->assertJsonFragment(['total'=>25]);   
-    }
-
-    public function test_postFilms_status405()
-    {
-        $response = $this->post('/api/films');
-
-        $response->assertStatus(405);
+            ->assertStatus(404);
     }
 }

@@ -2,67 +2,47 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+
+use App\Models\User;
 
 class UserTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_postUserSuccess()
-    {
-        $response = $this->postJson('/api/users', 
-        ['login'=> 'Login',
-        'password'=> 'Password',
-        'email'=> 'email@email.email',
-        'first_name'=> 'Name',
-        'last_name'=> 'LastName',
-        'role_id' => 0]);
+    protected $seed = true;
 
-        $response->assertStatus(201);
+    private $token = "";
+    
+    /*****************************
+    * Store
+    ****************************/
+
+    public function testPostUsers_shouldReturnLogin_test1()
+    {
+        $response = $this->postJson('/api/users/create', ['login' => 'test1', 'password' => 'Test1234', 'email' => 'test@gmail.com', 'last_name' => 'test', 'first_name' => 'test', 'role_id' => 1]);
+
+        $response
+            ->assertStatus(201);
     }
 
-    public function test_postUserFail_whenMissingColumn()
+    public function testPostUsers__withoutAnyInfo_shouldReturnError422()
     {
-        $response = $this->postJson('/api/users', 
-        [
-        'password'=> 'Password',
-        'email'=> 'email@email.email',
-        'first_name'=> 'Name',
-        'last_name'=> 'LastName',
-        'role_id' => 0]);
-
-        $response->assertStatus(422);          
+        $response = $this->postJson('/api/users/create');
+        $response
+            ->assertStatus(422);
     }
 
-    public function test_postUserFail_whenEmptyColumn()
+    /*****************************
+    * Database
+    ****************************/
+
+    public function testCreateUser_DatabaseHasCreatedUser()
     {
-        $response = $this->postJson('/api/users', 
-        [
-        'login'=> '',
-        'password'=> 'Password',
-        'email'=> 'email@email.email',
-        'first_name'=> 'Name',
-        'last_name'=> 'LastName',
-        'role_id' => 0]);
+        $users = User::factory()->count(1)->create();
 
-        $response->assertStatus(422);          
-    }
-
-    public function test_getUsers_status405()
-    {
-        $response = $this->get('/api/users');
-
-        $response->assertStatus(405);
-    }
-
-    public function testGetFilms()
-    {
-        $users = User::factory()->count(3)->make();
-        
         $this->assertDatabaseHas(
             'users',
             ['login' => $users[0]->login]

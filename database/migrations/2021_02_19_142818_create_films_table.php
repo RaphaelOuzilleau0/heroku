@@ -13,20 +13,26 @@ class CreateFilmsTable extends Migration
      */
     public function up()
     {
+        //https://stackoverflow.com/questions/54431456/php-laravel-pdoexception-general-error-referencing-column-and-referenced-column
+        // Problème de foreign key réglé avec
+        //                                  |
+        //                                  v
+        Schema::disableForeignKeyConstraints();
         Schema::create('films', function (Blueprint $table) {
             $table->id();
             $table->string('title', 50);
-            $table->year('release_year', 4)->nullable();
-            $table->integer('length')->length(3)->unsigned()->nullable();
+            $table->string('release_year', 4);
+            $table->integer('length');
             $table->text('description');
-            $table->string('rating', 5)->nullable();
-            $table->integer('language_id')->length(3)->unsigned(); // FOREIGN KEY
+            $table->string('rating', 5);
+            $table->bigInteger('language_id')->unsigned();
             $table->string('special_features', 200)->nullable();
             $table->string('image', 40)->nullable();
-            $table->timestamp('created_at');
+            $table->timestamps();
 
             $table->foreign('language_id')->references('id')->on('languages');
         });
+        Schema::enableForeignKeyConstraints();
     }
 
     /**

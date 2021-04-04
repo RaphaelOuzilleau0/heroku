@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateActorFilmsTable extends Migration
+class CreateActorFilmTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,16 @@ class CreateActorFilmsTable extends Migration
      */
     public function up()
     {
-        Schema::create('actor_films', function (Blueprint $table) {
-            //$table->id();
-            $table->integer('actor_id');
-            $table->integer('film_id');
-            $table->primary(array('actor_id', 'film_id'));
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+        Schema::disableForeignKeyConstraints();
+        Schema::create('actor_film', function (Blueprint $table) {
+            $table->bigInteger('actor_id')->unsigned();
+            $table->bigInteger('film_id')->unsigned();
+            $table->timestamps();
 
             $table->foreign('actor_id')->references('id')->on('actors');
             $table->foreign('film_id')->references('id')->on('films');
         });
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -33,6 +32,6 @@ class CreateActorFilmsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('actor_films');
+        Schema::dropIfExists('actor_film');
     }
 }

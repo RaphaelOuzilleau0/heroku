@@ -15,7 +15,7 @@ class Authenticate extends Middleware
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {
-            return route('login');
+            return \response(\json_encode(["message"=>"Conected User Access Only"]), 401)->header('Content-Type', 'application/json');
         }
     }
 }
