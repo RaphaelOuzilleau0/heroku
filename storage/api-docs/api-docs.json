@@ -1,0 +1,153 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "L5 OpenApi",
+        "description": "L5 Swagger OpenApi description",
+        "contact": {
+            "email": "darius@matulionis.lt"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/films/{id}/actors": {
+            "get": {
+                "tags": [
+                    "Films"
+                ],
+                "summary": "Get actors of a specific film",
+                "description": "Returns film's acotrs",
+                "operationId": "getFilmActorsById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Film id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                }
+            }
+        },
+        "/api/films/{id}/critics": {
+            "get": {
+                "tags": [
+                    "Films"
+                ],
+                "summary": "Get critics of a specific film",
+                "description": "Returns film's critics",
+                "operationId": "getFilmCriticsById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Film id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                }
+            }
+        },
+        "/api/films": {
+            "get": {
+                "tags": [
+                    "Films"
+                ],
+                "summary": "Get list of films",
+                "description": "Returns list of films",
+                "operationId": "getProjectsList",
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                }
+            }
+        },
+        "/api/films/{id}": {
+            "get": {
+                "tags": [
+                    "Films"
+                ],
+                "summary": "Get specific film",
+                "description": "Returns film data",
+                "operationId": "getFilmById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Film id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "successful operation"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Resource Not Found"
+                    }
+                }
+            }
+        },
+        "/api/users": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "summary": "Add a new user",
+                "description": "",
+                "operationId": "storeUser",
+                "requestBody": {
+                    "description": "User object that needs to be added",
+                    "required": true
+                },
+                "responses": {
+                    "405": {
+                        "description": "Invalid input"
+                    }
+                }
+            }
+        }
+    },
+    "security": [
+        []
+    ]
+}
